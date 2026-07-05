@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paradise Hotel Online Ordering System</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#f5f5f5;
+}
+
+header{
+    background:#800000;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+.manage-btn{
+    position:fixed;
+    top:20px;
+    right:20px;
+    background:#333;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.container{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    padding:20px;
+}
+
+.card{
+    width:300px;
+    background:white;
+    border-radius:10px;
+    overflow:hidden;
+    box-shadow:0 0 10px gray;
+}
+
+.card img{
+    width:100%;
+    height:200px;
+    object-fit:cover;
+}
+
+.info{
+    padding:15px;
+    text-align:center;
+}
+
+.info h3{
+    color:#800000;
+    margin-bottom:10px;
+}
+
+button{
+    background:#800000;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:5px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.order{
+    width:85%;
+    margin:20px auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px gray;
+}
+
+#managementPanel{
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:95%;
+    max-height:90%;
+    overflow:auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 20px black;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    border:1px solid black;
+    padding:10px;
+    text-align:center;
+}
+
+th{
+    background:#800000;
+    color:white;
+}
+
+.summary{
+    background:#eee;
+    padding:15px;
+    margin-bottom:20px;
+    border-radius:10px;
+}
+
+footer{
+    background:#333;
+    color:white;
+    text-align:center;
+    padding:15px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<button class="manage-btn" onclick="openManagement()">
+Management Panel
+</button>
+
+<header>
+<h1>DESIRE HOTEL ONLINE MENU</h1>
+</header>
+
+<div class="container">
+
+<div class="card">
+<img src="images/pilau.jpg">
+<div class="info">
+<h3>Pilau with Beef</h3>
+<p>KSh 500</p>
+Quantity:
+<input type="number" id="pilau" value="1" min="1">
+<br>
+<button onclick="addOrder('Pilau with Beef',500,'pilau')">
+Add To Order
+</button>
+</div>
+</div>
+
+<div class="card">
+<img src="images/chicken.jpg">
+<div class="info">
+<h3>Roasted Chicken</h3>
+<p>KSh 800</p>
+Quantity:
+<input type="number" id="chicken" value="1" min="1">
+<br>
+<button onclick="addOrder('Roasted Chicken',800,'chicken')">
+Add To Order
+</button>
+</div>
+</div>
+
+<div class="card">
+<img src="images/juice.jpg">
+<div class="info">
+<h3>Fresh Juice</h3>
+<p>KSh 200</p>
+Quantity:
+<input type="number" id="juice" value="1" min="1">
+<br>
+<button onclick="addOrder('Fresh Juice',200,'juice')">
+Add To Order
+</button>
+</div>
+</div>
+
+</div>
+
+<div class="order">
+
+<h2>Your Order</h2>
+<ul id="orderList"></ul>
+
+<h3>
+Total: KSh
+<span id="total">0</span>
+</h3>
+
+<br>
+
+<h2>Customer Type</h2>
+
+<label>
+<input type="radio"
+name="customer"
+onclick="showField('hotel')">
+Dining in Hotel
+</label>
+
+<br><br>
+
+<label>
+<input type="radio"
+name="customer"
+onclick="showField('outside')">
+Ordering Outside
+</label>
+
+<br><br>
+
+<div id="tableDiv" style="display:none">
+Table Number:
+<input type="number" id="tableNumber">
+</div>
+
+<div id="phoneDiv" style="display:none">
+Customer Phone:
+<input type="text" id="contactNumber">
+</div>
+
+<br>
+
+<h2>Payment Method</h2>
+
+<label>
+<input type="radio"
+name="payment"
+value="cash"
+checked>
+Cash Payment
+</label>
+
+<br><br>
+
+<label>
+<input type="radio"
+name="payment"
+value="phone">
+Mobile Payment
+</label>
+
+<br><br>
+
+<button onclick="processOrder()">
+Place Order
+</button>
+
+</div>
+
+<div id="managementPanel">
+
+<h2>MANAGEMENT PANEL</h2>
+
+<div class="summary">
+
+<h3>Sales Summary</h3>
+
+<p>Total Orders:
+<b id="totalOrders">0</b></p>
+
+<p>Total Sales:
+<b>KSh <span id="totalSales">0</span></b></p>
+
+<p>Delivered Orders:
+<b id="deliveredOrders">0</b></p>
+
+<p>Undelivered Orders:
+<b id="undeliveredOrders">0</b></p>
+
+</div>
+
+<table>
+
+<thead>
+<tr>
+<th>No</th>
+<th>Customer</th>
+<th>Items</th>
+<th>Payment</th>
+<th>Phone</th>
+<th>Total</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="ordersTable">
+</tbody>
+
+</table>
+
+<br>
+
+<button onclick="clearOrders()">
+Clear Orders
+</button>
+
+<button onclick="closeManagement()">
+Close
+</button>
+
+</div>
+
+<footer>
+© 2026 Paradise Hotel
+</footer>
+
+<script>
+
+let total=0;
+let currentOrder=[];
+
+function addOrder(food,price,id){
+
+    let qty=
+    parseInt(
+        document.getElementById(id).value
+    );
+
+    let amount=
+    qty*price;
+
+    total+=amount;
+
+    document
+    .getElementById("total")
+    .innerHTML=total;
+
+    let li=
+    document.createElement("li");
+
+    li.innerHTML=
+    food+" x "+
+    qty+" = KSh "+
+    amount;
+
+    document
+    .getElementById("orderList")
+    .appendChild(li);
+
+    currentOrder.push({
+        item:food,
+        quantity:qty
+    });
+}
+
+function showField(type){
+
+    if(type=="hotel"){
+        tableDiv.style.display="block";
+        phoneDiv.style.display="none";
+    }
+
+    if(type=="outside"){
+        phoneDiv.style.display="block";
+        tableDiv.style.display="none";
+    }
+}
+
+function saveOrder(payment,mobile){
+
+    let customer="";
+
+    if(tableDiv.style.display=="block"){
+        customer=
+        "Table "+
+        tableNumber.value;
+    }
+    else{
+        customer=
+        contactNumber.value;
+    }
+
+    let orders=
+    JSON.parse(
+        localStorage.getItem(
+            "hotelOrders"
+        )
+    )||[];
+
+    orders.push({
+        customer:customer,
+        items:currentOrder,
+        payment:payment,
+        mobile:mobile,
+        total:total,
+        status:"Undelivered"
+    });
+
+    localStorage.setItem(
+        "hotelOrders",
+        JSON.stringify(orders)
+    );
+}
+
+function processOrder(){
+
+    if(total==0){
+        alert(
+            "Please add food."
+        );
+        return;
+    }
+
+    let payment=
+    document.querySelector(
+        'input[name="payment"]:checked'
+    ).value;
+
+    let mobile="";
+
+    if(payment=="phone"){
+
+        mobile=
+        prompt(
+            "Enter mobile number:"
+        );
+
+        if(
+            mobile==""||
+            mobile==null
+        ){
+            return;
+        }
+
+        alert(
+            "Payment request sent to "+
+            mobile
+        );
+    }
+
+    saveOrder(
+        payment,
+        mobile
+    );
+
+    alert(
+        "Order placed successfully."
+    );
+
+    location.reload();
+}
+
+function openManagement(){
+
+    let password=
+    prompt(
+        "Enter Password"
+    );
+
+    if(
+        password!="admin123"
+    ){
+        alert(
+            "Wrong Password"
+        );
+        return;
+    }
+
+    managementPanel
+    .style.display=
+    "block";
+
+    loadOrders();
+}
+
+function closeManagement(){
+
+    managementPanel
+    .style.display=
+    "none";
+}
+
+function deliverOrder(index){
+
+    let orders=
+    JSON.parse(
+        localStorage.getItem(
+            "hotelOrders"
+        )
+    )||[];
+
+    orders[index]
+    .status=
+    "Delivered";
+
+    localStorage
+    .setItem(
+        "hotelOrders",
+        JSON.stringify(
+            orders
+        )
+    );
+
+    loadOrders();
+}
+
+function loadOrders(){
+
+    let table=
+    document
+    .getElementById(
+        "ordersTable"
+    );
+
+    table.innerHTML="";
+
+    let orders=
+    JSON.parse(
+        localStorage.getItem(
+            "hotelOrders"
+        )
+    )||[];
+
+    let sales=0;
+    let delivered=0;
+    let undelivered=0;
+
+    orders.forEach(
+        function(
+            order,
+            index
+        ){
+
+        let foods="";
+
+        order.items
+        .forEach(
+            function(
+                item
+            ){
+
+            foods+=
+            item.item+
+            " ("+
+            item.quantity+
+            "), ";
+        });
+
+        sales+=
+        order.total;
+
+        if(
+            order.status
+            ==
+            "Delivered"
+        )
+            delivered++;
+        else
+            undelivered++;
+
+        let action="";
+
+        if(
+            order.status
+            ==
+            "Undelivered"
+        ){
+            action=
+            "<button onclick='deliverOrder("
+            +index+
+            ")'>Deliver</button>";
+        }
+        else{
+            action=
+            "Completed";
+        }
+
+        table.innerHTML+=
+        "<tr>"+
+        "<td>"+(index+1)+"</td>"+
+        "<td>"+order.customer+"</td>"+
+        "<td>"+foods+"</td>"+
+        "<td>"+order.payment+"</td>"+
+        "<td>"+order.mobile+"</td>"+
+        "<td>KSh "+order.total+"</td>"+
+        "<td>"+order.status+"</td>"+
+        "<td>"+action+"</td>"+
+        "</tr>";
+    });
+
+    totalOrders
+    .innerHTML=
+    orders.length;
+
+    totalSales
+    .innerHTML=
+    sales;
+
+    deliveredOrders
+    .innerHTML=
+    delivered;
+
+    undeliveredOrders
+    .innerHTML=
+    undelivered;
+}
+
+function clearOrders(){
+
+    if(
+        confirm(
+            "Delete all orders?"
+        )
+    ){
+
+        localStorage
+        .removeItem(
+            "hotelOrders"
+        );
+
+        loadOrders();
+    }
+}
+
+</script>
+
+</body>
+</html>
